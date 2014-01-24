@@ -1,0 +1,11 @@
+@charset "UTF-8";
+
+/* @ignore:start; */
+omit this from scan
+/* @ignore:end; */
+
+@import "css-part.css";
+
+body {
+    background: red;
+}

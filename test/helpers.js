@@ -1,0 +1,31 @@
+var request = require('request'),
+    http = require('http'),
+    connect = require('connect'),
+    lint = require("../index")
+
+var server = null;
+
+function Helpers() {};
+
+Helpers.prototype.startServer = function(done) {
+    if (server) return done();
+    var app = connect();
+    var options = {};
+    app.use(lint(options));
+    app.use(connect.static(__dirname + "/public"));
+    app.use(function(err, req, res, next) { 
+        res.writeHead(500, {"Content-Type":"application/json"});
+        res.end(String(err));
+    });
+    server = http.createServer(app).listen(4567, done);
+};
+
+Helpers.prototype.get = function(url, done) {
+    request("http://localhost:4567/" + url, function (err,resp,body) {
+        if (done && typeof(done) == "function") {
+            done(err,resp,body);
+        }
+    });
+};
+
+exports = module.exports = new Helpers();
