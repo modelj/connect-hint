@@ -1,72 +1,75 @@
 /*! * 
- * Lint - Connect Middleware
+ * Hint - Connect Middleware
  * Copyright(c) 2014 Paper & Equator, LLC
  * Copyright(c) 2014 West Lane
  * MIT Licensed
  */
 
-var lintCSS = require("./lib/css");
-var lintJavascript = require("./lib/javascript");
+var scanCSS = require("./lib/css");
+var scanJavascript = require("./lib/javascript");
 
 /**
-* Lint Middleware
+* Hint Middleware
 */
 exports = module.exports = function(options){
 
     options = options || {};
 
-    // based on content type, which lint tools will we use?
-    var lint_map = {
-        "application/javascript": lintJavascript,
-        "text/css": lintCSS
+    // based on content type, which hint tools will we use?
+    var scan_map = {
+        "application/javascript": scanJavascript,
+        "text/css": scanCSS
     }
 
-    return function LintMiddleware(req, res, next) {
+    return function HintMiddleware(req, res, next) {
+        if ('GET' != req.method) return next();
+
         var write = res.write
             , end = res.end
-            , lint_fn = null,
-            content = "";
-
-        req.on('close', function(){
-            res.write = res.end = function(){};
-        });
-
+            , scanFn = null,
+            chunks = [];
+    
         // overload write() so we can scan what we're sending to browser
         res.write = function(chunk, encoding){
-            if (!lint_fn) {
+            // never alter or delay the planned response
+            write.apply(res, arguments);
+            
+            // run this only once to find applicable scanner
+            if (scanFn === null) {
                 var content_type = res.getHeader("content-type")
                     .match(/[a-z]*\/[a-z]*/)[0];
-                lint_fn = lint_map[content_type];
+                scanFn = scan_map[content_type];
             }
 
-            // skip unspported content types
-            if (lint_fn) {
-                // otherwise, build this content into part of the scan
-                content += String(chunk);
+            // did we find a scan function to execute?
+            if (scanFn) {
+                chunks.push(chunk);
             }
-            // now proceed as usual
-            return write.call(res, chunk, encoding);
         };
 
         // overload end() to ensure we know when content sending is finished
         res.end = function(chunk, encoding){
-            if (chunk) {
-                this.write(chunk, encoding);
-            }
-            // skip unsupported content types
-            if (typeof(lint_fn) == "function") {
+            // never alter or delay the planned response
+            if (chunk) this.write(chunk, encoding);
+            end.apply(res, arguments);
+            // now execute the scan function, if available
+            if (scanFn) {
                 var path = req._parsedUrl.pathname;
                 path = path.substr(1, path.length);
-                // now execute linting and log results
-                _lint(path, content, lint_fn);
+                var body = Buffer.concat(chunks).toString("utf8");
+                // now execute hinting and log results
+                _scan(path, body, scanFn);
             }
-            return end.call(res);
         };
+
         next();
     }
 };
 
-function _lint(path, content, fn) {
+/* 
+ *  Scans code for errors and warnings
+ */
+function _scan(path, content, fn) {
     var line_offset = 0;
     // you can omit third-party code by surrounding it with an @lib block
     var matches = content.match(/\/\* @ignore:start(.)*\*\/(\n|.)*\/\* @ignore:end \*\//g);
@@ -88,9 +91,15 @@ function _lint(path, content, fn) {
                 _log(path, warn.message, warn.line+line_offset, warn.col);
             }
         }
+        else {
+            console.log(path + ": valid");
+        }
     });
 }
 
+/* 
+ *  Logs errors and warnings to console
+ */
 function _log(path, message, line, col) {
     var msg = path + ": " + message;
     msg += " at line " + line + ", col " + col + ".";

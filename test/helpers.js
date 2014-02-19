@@ -1,7 +1,7 @@
 var request = require('request'),
     http = require('http'),
     connect = require('connect'),
-    lint = require("../index")
+    middleware = require("../index")
 
 var server = null;
 
@@ -11,7 +11,7 @@ Helpers.prototype.startServer = function(done) {
     if (server) return done();
     var app = connect();
     var options = {};
-    app.use(lint(options));
+    app.use(middleware(options));
     app.use(connect.static(__dirname + "/public"));
     app.use(function(err, req, res, next) { 
         res.writeHead(500, {"Content-Type":"application/json"});
