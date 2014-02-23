@@ -23,6 +23,13 @@ describe("javascript", function() {
         });
 
 
+        it("should work with big files", function(done) {
+            helpers.get("jquery.js", function(err, resp, body) {
+                return done();
+            });
+        });
+
+
         it("should skip bad code if contained in @lib block", function(done) {
             helpers.get("js-part-bad.js", function(err, resp, body) {
                 return done();

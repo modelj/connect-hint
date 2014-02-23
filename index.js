@@ -15,6 +15,22 @@ exports = module.exports = function(options){
 
     options = options || {};
 
+    /* 
+     *  Logs errors and warnings to console by default
+     */
+    var _onError = options.error || function (path, message, line, col) {
+        var msg = path + ": " + message;
+        msg += " at line " + line + ", col " + col + ".";
+        console.log(msg);
+    }
+    
+    /* 
+     *  Logs success messages to console by default
+     */
+    var _onSuccess = options.success || function(path) {
+        console.log(path + ": valid");
+    }
+
     // based on content type, which hint tools will we use?
     var scan_map = {
         "application/javascript": scanJavascript,
@@ -28,7 +44,6 @@ exports = module.exports = function(options){
             , end = res.end
             , scanFn = null,
             chunks = [];
-    
         // overload write() so we can scan what we're sending to browser
         res.write = function(chunk, encoding){
             // never alter or delay the planned response
@@ -50,8 +65,10 @@ exports = module.exports = function(options){
         // overload end() to ensure we know when content sending is finished
         res.end = function(chunk, encoding){
             // never alter or delay the planned response
-            if (chunk) this.write(chunk, encoding);
-            end.apply(res, arguments);
+            if (chunk) {
+                this.write(chunk, encoding);
+            }
+            end.call(res);
             // now execute the scan function, if available
             if (scanFn) {
                 var path = req._parsedUrl.pathname;
@@ -64,44 +81,36 @@ exports = module.exports = function(options){
 
         next();
     }
-};
 
-/* 
- *  Scans code for errors and warnings
- */
-function _scan(path, content, fn) {
-    var line_offset = 0;
-    // you can omit third-party code by surrounding it with an @lib block
-    var matches = content.match(/\/\* @ignore:start(.)*\*\/(\n|.)*\/\* @ignore:end \*\//g);
-    if (matches) {
-        line_offset = -1;
-        for (var idx in matches) {
-            // don't scan this part
-            var item = matches[idx];
-            content = content.replace(item, "");
-            line_offset += item.split(/\r\n|\r|\n/).length;
-        }
-    }
-
-    fn(content, function(warnings) {
-        if (warnings) {
-            for (var idx in warnings) {
-                var warn = warnings[idx];
-                // make sure we account for scan offset from library code
-                _log(path, warn.message, warn.line+line_offset, warn.col);
+    /* 
+     *  Scans code for errors and warnings
+     */
+    function _scan(path, content, fn) {
+        var line_offset = 0;
+        // you can omit third-party code by surrounding it with an @lib block
+        var matches = content.match(/\/\* @ignore:start(.)*\*\/(\n|.)*\/\* @ignore:end \*\//g);
+        if (matches) {
+            line_offset = -1;
+            for (var idx in matches) {
+                // don't scan this part
+                var item = matches[idx];
+                content = content.replace(item, "");
+                line_offset += item.split(/\r\n|\r|\n/).length;
             }
         }
-        else {
-            console.log(path + ": valid");
-        }
-    });
-}
 
-/* 
- *  Logs errors and warnings to console
- */
-function _log(path, message, line, col) {
-    var msg = path + ": " + message;
-    msg += " at line " + line + ", col " + col + ".";
-    console.log(msg);
-}
+        fn(content, function(warnings) {
+            if (warnings) {
+                for (var idx in warnings) {
+                    var warn = warnings[idx];
+                    // make sure we account for scan offset from library code
+                    _onError(path, warn.message, warn.line+line_offset, warn.col);
+                }
+            }
+            else {
+                _onSuccess(path);
+            }
+        });
+    }
+
+};
