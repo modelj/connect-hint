@@ -49,11 +49,13 @@ exports = module.exports = function(options){
             // never alter or delay the planned response
             write.apply(res, arguments);
             
-            // run this only once to find applicable scanner
-            if (scanFn === null) {
-                var content_type = res.getHeader("content-type")
-                    .match(/[a-z]*\/[a-z]*/)[0];
-                scanFn = scan_map[content_type];
+            if (res.getHeader("content-type")) {
+                // run this only once to find applicable scanner
+                if (scanFn === null) {
+                    var content_type = res.getHeader("content-type")
+                        .match(/[a-z]*\/[a-z]*/)[0];
+                    scanFn = scan_map[content_type];
+                }
             }
 
             // did we find a scan function to execute?
