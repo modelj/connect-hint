@@ -1,7 +1,7 @@
 {
     "name": "connect-lint",
     "description": "Middleware to check code quality for Javascript and CSS",
-    "version": "0.0.2",
+    "version": "0.0.3",
      "author": {
         "name": "West Lane",
         "email": "west@paperequator.com"

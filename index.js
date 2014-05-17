@@ -1,5 +1,5 @@
 /*! * 
- * Hint - Connect Middleware
+ * Lint - Connect Middleware
  * Copyright(c) 2014 Paper & Equator, LLC
  * Copyright(c) 2014 West Lane
  * MIT Licensed
@@ -11,19 +11,19 @@ var scanJavascript = require("./lib/javascript");
 
 
 /**
-* Hint Middleware
+* Lint Middleware
 */
 exports = module.exports = function(options){
 
     options = options || {};
 
-    // based on content type, which hint tools will we use?
+    // based on content type, which lint tools will we use?
     var scan_map = {
         "application/javascript": scanJavascript,
         "text/css": scanCSS
     }
 
-    return function HintMiddleware(req, res, next) {
+    return function LintMiddleware(req, res, next) {
         if ('GET' != req.method) return next();
 
         var write = res.write
@@ -61,7 +61,7 @@ exports = module.exports = function(options){
             if (scanFn) {
                 var path = req._parsedUrl.pathname;
                 var body = Buffer.concat(chunks).toString("utf8");
-                // now execute hinting and log results
+                // now execute linting and log results
                 _scan(path, body, scanFn);
             }
         };

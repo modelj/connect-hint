@@ -1,6 +1,6 @@
-# Hint Middleware
+# Lint Middleware
 
-  Hint is a local development tool. With zero setup, it will keep
+  Lint is a local development tool. With zero setup, it will keep
   you informed of possible problems in your CSS and JS code. 
   Any warning and errors will be reported automatically in your console,
   so you can iterate quickly and keep your code clean.
