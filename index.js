@@ -74,7 +74,6 @@ exports = module.exports = function(options){
             // now execute the scan function, if available
             if (scanFn) {
                 var path = req._parsedUrl.pathname;
-                path = path.substr(1, path.length);
                 var body = Buffer.concat(chunks).toString("utf8");
                 // now execute hinting and log results
                 _scan(path, body, scanFn);
