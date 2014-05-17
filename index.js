@@ -5,8 +5,10 @@
  * MIT Licensed
  */
 
+var winston = require("winston");
 var scanCSS = require("./lib/css");
 var scanJavascript = require("./lib/javascript");
+
 
 /**
 * Hint Middleware
@@ -14,22 +16,6 @@ var scanJavascript = require("./lib/javascript");
 exports = module.exports = function(options){
 
     options = options || {};
-
-    /* 
-     *  Logs errors and warnings to console by default
-     */
-    var _onError = options.error || function (path, message, line, col) {
-        var msg = path + ": " + message;
-        msg += " at line " + line + ", col " + col + ".";
-        console.log(msg);
-    }
-    
-    /* 
-     *  Logs success messages to console by default
-     */
-    var _onSuccess = options.success || function(path) {
-        console.log(path + ": valid");
-    }
 
     // based on content type, which hint tools will we use?
     var scan_map = {
@@ -79,7 +65,6 @@ exports = module.exports = function(options){
                 _scan(path, body, scanFn);
             }
         };
-
         next();
     }
 
@@ -87,31 +72,30 @@ exports = module.exports = function(options){
      *  Scans code for errors and warnings
      */
     function _scan(path, content, fn) {
-        var line_offset = 0;
+        var offset = 0;
         // you can omit third-party code by surrounding it with an @lib block
         var matches = content.match(/\/\* @ignore:start(.)*\*\/(\n|.)*\/\* @ignore:end \*\//g);
         if (matches) {
-            line_offset = -1;
+            offset = -1;
             for (var idx in matches) {
                 // don't scan this part
                 var item = matches[idx];
                 content = content.replace(item, "");
-                line_offset += item.split(/\r\n|\r|\n/).length;
+                offset += item.split(/\r\n|\r|\n/).length;
             }
         }
-
-        fn(content, function(warnings) {
-            if (warnings) {
-                for (var idx in warnings) {
-                    var warn = warnings[idx];
-                    // make sure we account for scan offset from library code
-                    _onError(path, warn.message, warn.line+line_offset, warn.col);
+        if (content.length) {
+            fn(content, function(err,type) {
+                if (err) {
+                    winston.warn("%s: %s at line %s, col %s.", 
+                    path.substr(1, path.length), err.message, err.line+offset, err.col);
                 }
-            }
-            else {
-                _onSuccess(path);
-            }
-        });
+                else {            
+                    // success, no need to report any errors
+                    winston.info("%s: Valid %s", path.substr(1, path.length), type);
+                }
+            }); 
+        }
     }
 
 };
