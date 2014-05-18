@@ -1,31 +1,31 @@
 {
-    "name": "connect-lint",
-    "description": "Middleware to check code quality for Javascript and CSS",
-    "version": "0.0.3",
-     "author": {
-        "name": "West Lane",
-        "email": "west@paperequator.com"
-    },
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/westlane/connect-lint.git"
-    },
-    "dependencies": {   
-        "connect": "2.x",
-        "csslint": "0.10.x",
-        "jshint": "2.3.x",
-        "winston": "0.7.x"
-    },
-    "devDependencies": {
-        "mocha": ">= 1.14.x",
-        "should": "*"
-    },
-    "main": "index",
-    "engines": {
-        "node": ">= 0.10.0"
-    },
-    "scripts": {
-        "test": "mocha ./test"
-    }
+  "name": "connect-lint",
+  "description": "Middleware to check code quality for Javascript and CSS",
+  "version": "0.0.5",
+  "author": {
+    "name": "West Lane",
+    "email": "west@paperequator.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/westlane/connect-lint.git"
+  },
+  "dependencies": {
+    "connect": "2.x",
+    "csslint": "0.10.x",
+    "jshint": "2.3.x",
+    "winston": "0.7.x"
+  },
+  "devDependencies": {
+    "mocha": ">= 1.14.x",
+    "should": "*"
+  },
+  "main": "index",
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "scripts": {
+    "test": "mocha ./test"
+  }
 }
