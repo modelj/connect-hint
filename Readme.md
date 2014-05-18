@@ -10,16 +10,22 @@
 
   This middleware evaluates only the code sent to your browser, 
   not the original content of your files. 
-  As such, Hint plays nicely with most other middleware, including 
+  As such, Lint plays nicely with most other middleware, including 
   compilers for Sass, LESS and CoffeeScript.
 
-  Hint picks which code to scan based on requests to the server. For example, 
+  Lint picks which code to scan based on requests to the server. For example, 
   if you request a page that includes a Javascript file 
   and two CSS files, only these three files will be scanned.
 
 ## Getting Started
 
-  To ensure proper scanning, we recommend loading Hint above all other 
+  This middleware requires [Connect 2.x](http://www.senchalabs.org/connect/) and may also be paired with [Express](http://expressjs.com).
+
+  To install, you may use this command:
+    
+    npm install connect-lint
+
+  To ensure proper scanning, we recommend loading Lint above all other 
   middleware.
 
     var connect = require('connect')
@@ -28,8 +34,7 @@
 
     var app = connect()
       .use(lint())
-      .use(connect.logger('dev'))
-      .use(connect.static('public'));
+      .use(connect.static(__dirname + "/public"));
 
     http.createServer(app).listen(3000);
 

@@ -11,14 +11,14 @@
         "type": "git",
         "url": "git://github.com/westlane/connect-lint.git"
     },
-    "dependencies": {    
+    "dependencies": {   
         "connect": "2.x",
-        "csslint": ">= 0.10.0",
-        "jshint": ">= 2.3.0",
-        "winston": ">= 0.7.2"
+        "csslint": "0.10.x",
+        "jshint": "2.3.x",
+        "winston": "0.7.x"
     },
     "devDependencies": {
-        "mocha": ">= 1.14.0",
+        "mocha": ">= 1.14.x",
         "should": "*"
     },
     "main": "index",
